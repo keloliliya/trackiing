@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UPS Tracking Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07090F;--surface:rgba(255,255,255,.05);--surface2:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.09);--teal:#00C9A7;--teal2:#009E86;
+  --text:#E2E8F0;--muted:#64748B;--blue:#3B82F6;--amber:#F59E0B;
+  --violet:#8B5CF6;--green:#10B981;--gray:#6B7280;--red:#EF4444;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* ── Header ─────────────────────────────────────────────────────────────── */
+header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15);
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(8px);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:22px}
+.logo-text{font-size:18px;font-weight:700;color:var(--teal)}
+.logo-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.header-right{display:flex;align-items:center;gap:12px}
+.sync-info{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;font-weight:600;}
+.indicator{width:8px;height:8px;border-radius:50%;background:var(--gray);}
+.indicator.online{background:var(--green);box-shadow:0 0 8px var(--green);}
+.indicator.offline{background:var(--red);box-shadow:0 0 8px var(--red);}
+.agent-banner{display:none;background:rgba(239,68,68,.15);color:var(--red);border-bottom:1px solid rgba(239,68,68,.3);padding:10px;text-align:center;font-size:13px;font-weight:600;}
+.agent-banner.show{display:block;}
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;
+  font-weight:600;font-family:'Inter',sans-serif;transition:all .2s}
+.btn-primary{background:var(--teal);color:#000}
+.btn-primary:hover{background:var(--teal2)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+/* ── Stats ──────────────────────────────────────────────────────────────── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:16px 20px}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat-value{font-size:28px;font-weight:700;margin-top:4px}
+.stat-value.total{color:var(--teal)}.stat-value.delivered{color:var(--green)}
+.stat-value.transit{color:var(--amber)}.stat-value.out{color:var(--violet)}
+/* ── Filters ─────────────────────────────────────────────────────────────── */
+.filters{display:flex;gap:8px;padding:0 28px 16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:12px;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{background:var(--teal);color:#000;border-color:var(--teal)}
+/* ── Card grid ───────────────────────────────────────────────────────────── */
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));
+  gap:18px;padding:0 28px 40px}
+.empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted)}
+.empty-state .e-icon{font-size:48px;margin-bottom:16px}
+.empty-state h3{font-size:18px;color:var(--text);margin-bottom:8px}
+/* ── Parcel card ──────────────────────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.card.fetching{border-color:rgba(0,201,167,.3)}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:16px 18px 12px}
+.card-tn{font-family:monospace;font-size:14px;font-weight:600;color:var(--teal);
+  letter-spacing:.04em}
+.card-label-tag{font-size:11px;color:var(--muted);margin-top:3px}
+.card-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge-gray{background:rgba(107,114,128,.2);color:var(--gray)}
+.badge-blue{background:rgba(59,130,246,.2);color:var(--blue)}
+.badge-amber{background:rgba(245,158,11,.2);color:var(--amber)}
+.badge-violet{background:rgba(139,92,246,.2);color:var(--violet)}
+.badge-green{background:rgba(16,185,129,.2);color:var(--green)}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;
+  padding:2px 4px;border-radius:4px;transition:color .2s}
+.del-btn:hover{color:var(--red)}
+.fetch-spinner{width:12px;height:12px;border:2px solid rgba(0,201,167,.3);
+  border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── Delivery box ─────────────────────────────────────────────────────────── */
+.delivery-box{padding:12px 18px;background:rgba(0,201,167,.06);
+  border-top:1px solid rgba(0,201,167,.1);border-bottom:1px solid rgba(0,201,167,.1)}
+.delivery-label-sm{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.delivery-time{font-size:15px;font-weight:700;color:var(--teal);margin-top:3px;line-height:1.3}
+.delivery-box.pending{opacity:.5}
+.shipto{padding:8px 18px;font-size:12px;color:var(--muted)}
+.shipto span{color:var(--text);font-weight:500}
+/* ── Timeline ────────────────────────────────────────────────────────────── */
+.timeline{display:flex;align-items:flex-start;padding:14px 18px;gap:0;overflow-x:auto}
+.tl-step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:60px;
+  position:relative}
+.tl-step:not(:last-child)::after{content:'';position:absolute;top:10px;left:50%;
+  width:100%;height:2px;background:var(--border);z-index:0}
+.tl-step.s-completed:not(:last-child)::after{background:var(--teal)}
+.tl-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  font-size:9px;z-index:1;position:relative;transition:all .3s}
+.tl-step.s-completed .tl-dot{background:var(--teal);border-color:var(--teal);color:#000;font-weight:700}
+.tl-step.s-active .tl-dot{background:var(--bg);border-color:var(--teal);
+  box-shadow:0 0 0 3px rgba(0,201,167,.25);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(0,201,167,.25)}50%{box-shadow:0 0 0 6px rgba(0,201,167,.1)}}
+.tl-step.s-pending .tl-dot{border-color:rgba(255,255,255,.15)}
+.tl-name{font-size:9px;color:var(--muted);margin-top:5px;text-align:center;line-height:1.2}
+.tl-step.s-completed .tl-name,.tl-step.s-active .tl-name{color:var(--text)}
+.tl-loc{font-size:8px;color:var(--muted);text-align:center;margin-top:2px;line-height:1.2}
+.tl-date{font-size:8px;color:var(--muted);text-align:center;line-height:1.2}
+/* ── Card footer ──────────────────────────────────────────────────────────── */
+.card-footer{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+.error-msg{padding:8px 18px;font-size:11px;color:var(--red);
+  background:rgba(239,68,68,.07);border-top:1px solid rgba(239,68,68,.15)}
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
+.skeleton{height:20px;background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,
+  rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;
+  border-radius:4px;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  backdrop-filter:blur(4px)}
+.overlay.open{display:flex;align-items:center;justify-content:center}
+.modal{background:#111827;border:1px solid var(--border);border-radius:20px;
+  padding:30px;width:420px;max-width:90vw}
+.modal h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--muted);margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.form-group input{width:100%;padding:10px 14px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;color:var(--text);
+  font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border .2s}
+.form-group input:focus{border-color:var(--teal)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+.toast{position:fixed;bottom:24px;right:24px;background:#1F2937;
+  border-left:3px solid var(--teal);padding:12px 18px;border-radius:8px;
+  font-size:13px;z-index:300;opacity:0;transform:translateY(10px);
+  transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ── Agent Offline Banner ────────────────────────────────────────────────── -->
+<div class="agent-banner" id="agentBanner">
+  ⚠ WARNING: Tracking Agent is currently Offline. It has stopped fetching new data. Please run upstracking_v2.exe
+</div>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">📦</div>
+    <div>
+      <div class="logo-text">UPS Tracking Dashboard</div>
+      <div class="logo-sub">Jewellery Shipment Monitor</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-info" id="syncInfo">
+        <div class="indicator" id="agentDot"></div>
+        <span id="agentText">Connecting…</span>
+    </div>
+    <button class="btn btn-ghost" onclick="openSettingsModal()">⚙ Settings</button>
+    <button class="btn btn-primary" onclick="openModal()">+ Add Tracking</button>
+  </div>
+</header>
+
+<!-- ── Stats ──────────────────────────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="stat-label">Total Parcels</div>
+    <div class="stat-value total" id="sTotal">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Delivered</div>
+    <div class="stat-value delivered" id="sDelivered">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">In Transit</div>
+    <div class="stat-value transit" id="sTransit">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Out for Delivery</div>
+    <div class="stat-value out" id="sOut">0</div>
+  </div>
+</div>
+
+<!-- ── Filters ─────────────────────────────────────────────────────────────── -->
+<div class="filters">
+  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn" onclick="setFilter('Label Created',this)">Label Created</button>
+  <button class="filter-btn" onclick="setFilter('We Have Your Package',this)">Received</button>
+  <button class="filter-btn" onclick="setFilter('On the Way',this)">In Transit</button>
+  <button class="filter-btn" onclick="setFilter('Out for Delivery',this)">Out for Delivery</button>
+  <button class="filter-btn" onclick="setFilter('Delivered',this)">Delivered</button>
+</div>
+
+<!-- ── Cards ──────────────────────────────────────────────────────────────── -->
+<div id="cards"><div class="empty-state"><div class="e-icon">🔄</div><h3>Connecting to Firebase…</h3></div></div>
+
+<!-- ── Add Modal ──────────────────────────────────────────────────────────── -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>➕ Add Tracking Number</h2>
+    <p>The EXE service will automatically start tracking once added.</p>
+    <div class="form-group">
+      <label>UPS Tracking Number *</label>
+      <input id="inp-tn" placeholder="e.g. 1Z3R22440410131817" maxlength="40">
+    </div>
+    <div class="form-group">
+      <label>Label / Description (optional)</label>
+      <input id="inp-label" placeholder="e.g. Customer Order #102">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addTracking()">Add to Watchlist</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ──────────────────────────────────────────────────────────── -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <h2>⚙ System Settings</h2>
+    <p>Configure how often the background agent checks for UPS updates.</p>
+    <div class="form-group">
+      <label>Default Check Interval (Minutes)</label>
+      <input type="number" id="inp-interval" value="150" min="1">
+      <div style="font-size:11px;color:var(--amber);margin-top:6px" id="lbl-min-interval">Minimum allowed: 1 minute (1 min per parcel)</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSettingsModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ── Firebase SDK ───────────────────────────────────────────────────────── -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// 🔧 EDIT THESE WITH YOUR FIREBASE PROJECT DETAILS (see setup guide)
+// ══════════════════════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyB5fTxAVEUoy5WYWne0-MFfgwwqPTjbt8E",
+  authDomain: "ups-tracker-1d9d9.firebaseapp.com",
+  databaseURL: "https://ups-tracker-1d9d9-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ups-tracker-1d9d9",
+  storageBucket: "ups-tracker-1d9d9.firebasestorage.app",
+  messagingSenderId: "203576217064",
+  appId: "1:203576217064:web:4ee2c0d42c07a4d4f6a85d"
+};
+// ══════════════════════════════════════════════════════════════════════════════
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let watchlist    = {};
+let trackingData = {};
+let systemSettings = { interval_minutes: 150 };
+let activeFilter = 'all';
+let agentLastPing = 0;
+
+const STEP_KEYS   = ['label_created','we_have_your_package','on_the_way','out_for_delivery','delivered'];
+const STEP_LABELS = ['Label','Received','In Transit','Out for Del.','Delivered'];
+
+// ── Agent Heartbeat Monitor ───────────────────────────────────────────────────
+db.ref('system/last_ping').on('value', snap => {
+  agentLastPing = snap.val() || 0;
+  checkAgentStatus();
+});
+
+setInterval(checkAgentStatus, 3000);
+
+function checkAgentStatus() {
+  const diff = Date.now() - agentLastPing;
+  const isOnline = diff < 30000; // Agent pings every 10-15s, so 30s is safe
+  
+  const textEl = document.getElementById('agentText');
+  const dotEl  = document.getElementById('agentDot');
+  const banner = document.getElementById('agentBanner');
+  
+  if(isOnline) {
+    textEl.textContent = 'Agent Online';
+    dotEl.className = 'indicator online';
+    banner.classList.remove('show');
+  } else {
+    textEl.textContent = 'Agent Offline';
+    dotEl.className = 'indicator offline';
+    banner.classList.add('show');
+  }
+}
+
+// ── Firebase listeners ────────────────────────────────────────────────────────
+db.ref('watchlist').on('value', snap => {
+  watchlist = snap.val() || {};
+  render();
+  updateStats();
+});
+
+db.ref('system/settings').on('value', snap => {
+  systemSettings = snap.val() || { interval_minutes: 150 };
+  document.getElementById('inp-interval').value = systemSettings.interval_minutes;
+});
+
+db.ref('tracking_data').on('value', snap => {
+  trackingData = snap.val() || {};
+  render();
+  updateStats();
+});
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const tns = Object.values(watchlist).map(i => i.tracking_number).filter(Boolean);
+  let delivered=0, transit=0, out=0;
+  tns.forEach(tn => {
+    const s = (trackingData[tn]||{}).status || '';
+    if (s==='Delivered') delivered++;
+    else if (s==='On the Way') transit++;
+    else if (s==='Out for Delivery') out++;
+  });
+  document.getElementById('sTotal').textContent     = tns.length;
+  document.getElementById('sDelivered').textContent = delivered;
+  document.getElementById('sTransit').textContent   = transit;
+  document.getElementById('sOut').textContent       = out;
+  document.getElementById('lbl-min-interval').textContent = `Minimum enforced safety interval: ${Math.max(1, tns.length)} minutes`;
+}
+
+// ── Render cards ──────────────────────────────────────────────────────────────
+function render() {
+  const container  = document.getElementById('cards');
+  const entries    = Object.entries(watchlist);
+
+  if (!entries.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="e-icon">📦</div>
+        <h3>No parcels in watchlist</h3>
+        <p style="color:var(--muted);margin-top:8px">Click "+ Add Tracking" to get started</p>
+      </div>`;
+    return;
+  }
+
+  const filtered = activeFilter === 'all'
+    ? entries
+    : entries.filter(([,item]) => {
+        const s = (trackingData[item.tracking_number]||{}).status||'';
+        return s === activeFilter;
+      });
+
+  if (!filtered.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="e-icon">🔍</div>
+        <h3>No parcels match this filter</h3>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(([key,item]) => buildCard(key, item)).join('');
+}
+
+function buildCard(key, item) {
+  const tn   = item.tracking_number || '';
+  const lbl  = item.label || '';
+  const data = trackingData[tn] || {};
+
+  const status   = data.status     || '';
+  const fetching = data.fetching   || false;
+  const estDel   = data.estimated_delivery || '';
+  const shipTo   = data.ship_to    || '';
+  const errMsg   = data.error      || '';
+  const lastUpd  = data.last_updated ? fmtAgo(data.last_updated) : 'Pending first fetch…';
+  const isDelivered = status.toLowerCase().includes('delivered');
+
+  const badgeMap = {
+    'Label Created':'badge-gray','We Have Your Package':'badge-blue',
+    'On the Way':'badge-amber','Out for Delivery':'badge-violet','Delivered':'badge-green'
+  };
+  const badgeClass = badgeMap[status] || 'badge-gray';
+
+  // Timeline steps
+  const steps = data.steps || {};
+  const timelineHTML = STEP_KEYS.map((sk, i) => {
+    const step  = steps[sk] || {};
+    const state = step.state || 'pending';
+    const cls   = `s-${state}`;
+    const loc   = step.city ? `${step.city}` : (step.country || '');
+    const country = step.country && step.city ? step.country : '';
+    const dt    = step.date ? step.date + (step.time ? ', '+step.time : '') : '';
+    const dot   = state==='completed' ? '✓' : (state==='active' ? '●' : '');
+    return `
+      <div class="tl-step ${cls}">
+        <div class="tl-dot">${dot}</div>
+        <div class="tl-name">${STEP_LABELS[i]}</div>
+        ${loc ? `<div class="tl-loc">${loc}</div>` : ''}
+        ${country ? `<div class="tl-loc">${country}</div>` : ''}
+        ${dt ? `<div class="tl-date">${dt}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  const deliveryBox = fetching
+    ? `<div class="delivery-box"><div class="skeleton" style="width:80%;height:18px"></div></div>`
+    : estDel
+      ? `<div class="delivery-box">
+           <div class="delivery-label-sm">${isDelivered ? 'Delivered On' : 'Estimated Delivery'}</div>
+           <div class="delivery-time">${estDel}</div>
+         </div>`
+      : `<div class="delivery-box pending">
+           <div class="delivery-time" style="font-size:13px">Awaiting tracking data…</div>
+         </div>`;
+
+  return `
+    <div class="card ${fetching?'fetching':''}" id="card-${tn}">
+      <div class="card-header">
+        <div>
+          <div class="card-tn">${tn}</div>
+          ${lbl ? `<div class="card-label-tag">🏷 ${lbl}</div>` : ''}
+        </div>
+        <div class="card-header-right">
+          ${status ? `<span class="badge ${badgeClass}">${status}</span>` : ''}
+          ${fetching ? `<div class="fetch-spinner" title="Syncing…"></div>` : ''}
+          <button class="del-btn" onclick="removeTracking('${key}','${tn}')" title="Remove">✕</button>
+        </div>
+      </div>
+      ${deliveryBox}
+      ${shipTo ? `<div class="shipto"><span>${isDelivered?'Delivered To':'Ship To'}: </span>${shipTo.toUpperCase()}</div>` : ''}
+      <div class="timeline">${timelineHTML}</div>
+      ${errMsg ? `<div class="error-msg">⚠ ${errMsg}</div>` : ''}
+      <div class="card-footer">
+        <span>🕐 ${lastUpd}</span>
+        ${fetching ? `<span style="color:var(--teal);font-size:10px">🔄 Syncing…</span>` : ''}
+      </div>
+    </div>`;
+}
+
+// ── Add / Remove ──────────────────────────────────────────────────────────────
+function addTracking() {
+  const tn  = document.getElementById('inp-tn').value.trim().toUpperCase();
+  const lbl = document.getElementById('inp-label').value.trim();
+  if (!tn) { toast('Please enter a tracking number.','#EF4444'); return; }
+
+  // Check duplicate
+  const existing = Object.values(watchlist).find(i => i.tracking_number === tn);
+  if (existing) { toast('Already in watchlist.','#F59E0B'); return; }
+
+  db.ref('watchlist').push({
+    tracking_number: tn,
+    label:           lbl,
+    added_at:        Date.now()
+  }).then(() => {
+    closeModal();
+    toast('✅ Added! Service will track it shortly.');
+  }).catch(e => toast('Error: '+e.message,'#EF4444'));
+}
+
+function removeTracking(key, tn) {
+  if (!confirm(`Remove tracking for ${tn}?`)) return;
+  db.ref(`watchlist/${key}`).remove();
+  db.ref(`tracking_data/${tn}`).remove();
+  toast('Removed from watchlist.');
+}
+
+// ── Filter ───────────────────────────────────────────────────────────────────
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal()  {
+  document.getElementById('inp-tn').value='';
+  document.getElementById('inp-label').value='';
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('inp-tn').focus(),100);
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target===e.currentTarget) closeModal();
+});
+
+function openSettingsModal()  {
+  document.getElementById('inp-interval').value = systemSettings.interval_minutes || 150;
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettingsModal() { document.getElementById('settingsOverlay').classList.remove('open'); }
+document.getElementById('settingsOverlay').addEventListener('click', e => {
+  if (e.target===e.currentTarget) closeSettingsModal();
+});
+function saveSettings() {
+  const val = parseInt(document.getElementById('inp-interval').value);
+  if (!val || val < 1) return toast('Please enter a valid number','red');
+  db.ref('system/settings/interval_minutes').set(val).then(() => {
+    closeSettingsModal();
+    toast('⚙ Settings updated!');
+  }).catch(e => toast('Error: '+e.message,'#EF4444'));
+}
+
+document.addEventListener('keydown', e => { 
+  if(e.key==='Escape') { closeModal(); closeSettingsModal(); }
+});
+document.getElementById('inp-tn').addEventListener('keydown', e => {
+  if(e.key==='Enter') addTracking();
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmtAgo(ms) {
+  const diff = Math.floor((Date.now()-ms)/1000);
+  if (diff<60)   return 'Just now';
+  if (diff<3600) return `${Math.floor(diff/60)} min ago`;
+  if (diff<86400)return `${Math.floor(diff/3600)} hr ago`;
+  return new Date(ms).toLocaleString();
+}
+function fmtTime(ms) {
+  return new Date(ms).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+function toast(msg, color='#00C9A7') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.borderColor = color;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
