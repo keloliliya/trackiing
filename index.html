@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UPS Tracking Dashboard</title>
+<title>UPS Tracking Dashboard v3.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -14,73 +14,111 @@
   --violet:#8B5CF6;--green:#10B981;--gray:#6B7280;--red:#EF4444;
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-/* ── Header ─────────────────────────────────────────────────────────────── */
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
 header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15);
   padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
   backdrop-filter:blur(8px);position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-icon{font-size:22px}
 .logo-text{font-size:18px;font-weight:700;color:var(--teal)}
-.logo-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:1px}
 .header-right{display:flex;align-items:center;gap:12px}
-.sync-info{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;font-weight:600;}
-.indicator{width:8px;height:8px;border-radius:50%;background:var(--gray);}
-.indicator.online{background:var(--green);box-shadow:0 0 8px var(--green);}
-.indicator.offline{background:var(--red);box-shadow:0 0 8px var(--red);}
-.agent-banner{display:none;background:rgba(239,68,68,.15);color:var(--red);border-bottom:1px solid rgba(239,68,68,.3);padding:10px;text-align:center;font-size:13px;font-weight:600;}
-.agent-banner.show{display:block;}
+.sync-info{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;font-weight:600}
+.indicator{width:8px;height:8px;border-radius:50%;background:var(--gray)}
+.indicator.online{background:var(--green);box-shadow:0 0 8px var(--green)}
+.indicator.offline{background:var(--red);box-shadow:0 0 8px var(--red)}
+.agent-banner{display:none;background:rgba(239,68,68,.15);color:var(--red);
+  border-bottom:1px solid rgba(239,68,68,.3);padding:10px;text-align:center;
+  font-size:13px;font-weight:600}
+.agent-banner.show{display:block}
 .btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;
   font-weight:600;font-family:'Inter',sans-serif;transition:all .2s}
 .btn-primary{background:var(--teal);color:#000}
 .btn-primary:hover{background:var(--teal2)}
-.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
-.btn-danger:hover{background:rgba(239,68,68,.25)}
 .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
 .btn-ghost:hover{background:var(--surface2);color:var(--text)}
-/* ── Stats ──────────────────────────────────────────────────────────────── */
-.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 28px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
-  padding:16px 20px}
+
+/* ── Stats ───────────────────────────────────────────────────────────────── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 28px 10px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
 .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .stat-value{font-size:28px;font-weight:700;margin-top:4px}
 .stat-value.total{color:var(--teal)}.stat-value.delivered{color:var(--green)}
 .stat-value.transit{color:var(--amber)}.stat-value.out{color:var(--violet)}
+
+/* ── Recent Updates ──────────────────────────────────────────────────────── */
+.updates-bar{padding:0 28px 20px;display:flex;align-items:center;
+  gap:12px;overflow-x:auto;white-space:nowrap}
+.updates-title{font-size:12px;font-weight:700;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
+.update-tag{font-size:11px;padding:8px 14px;background:rgba(59,130,246,.1);
+  color:#fff;border-radius:20px;border:1px solid rgba(59,130,246,.3);
+  display:flex;align-items:center;gap:6px;flex-shrink:0}
+.update-tag strong{color:var(--teal)}
+.update-tag .arr{color:var(--muted)}
+.update-tag .time{font-size:9px;opacity:.6;margin-left:4px}
+.update-tag .cls-btn{background:none;border:none;color:inherit;opacity:.5;cursor:pointer;
+  font-size:10px;margin-left:4px;padding:0 4px}
+.update-tag .cls-btn:hover{opacity:1;color:var(--red)}
+.update-tag.status-Delivered{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3)}
+.update-tag.status-Out{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3)}
+
 /* ── Filters ─────────────────────────────────────────────────────────────── */
-.filters{display:flex;gap:8px;padding:0 28px 16px;flex-wrap:wrap}
+.filters{display:flex;gap:8px;padding:0 28px 16px;flex-wrap:wrap;align-items:center}
+.filter-label{font-size:12px;color:var(--muted);font-weight:600;margin-right:4px}
 .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);
   background:transparent;color:var(--muted);font-size:12px;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all .2s}
-.filter-btn.active,.filter-btn:hover{background:var(--teal);color:#000;border-color:var(--teal)}
+  font-family:'Inter',sans-serif;transition:all .2s;opacity:.5}
+.filter-btn.active{background:rgba(0,201,167,.15);color:var(--teal);border-color:var(--teal);opacity:1}
+.filter-btn:hover{background:var(--surface2);opacity:1}
+
 /* ── Card grid ───────────────────────────────────────────────────────────── */
-#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));
-  gap:18px;padding:0 28px 40px}
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:18px;padding:0 28px 40px}
 .empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted)}
 .empty-state .e-icon{font-size:48px;margin-bottom:16px}
 .empty-state h3{font-size:18px;color:var(--text);margin-bottom:8px}
+
 /* ── Parcel card ──────────────────────────────────────────────────────────── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
-  overflow:hidden;transition:transform .2s,box-shadow .2s}
+  overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .3s}
 .card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
-.card.fetching{border-color:rgba(0,201,167,.3)}
-.card-header{display:flex;justify-content:space-between;align-items:flex-start;
-  padding:16px 18px 12px}
-.card-tn{font-family:monospace;font-size:14px;font-weight:600;color:var(--teal);
-  letter-spacing:.04em}
+/* Refreshing glow — only when card already has data */
+.card.refreshing{border-color:rgba(0,201,167,.4);
+  animation:card-glow 2s ease-in-out infinite}
+@keyframes card-glow{
+  0%,100%{box-shadow:0 0 0 1px rgba(0,201,167,.15),0 0 18px rgba(0,201,167,.08)}
+  50%{box-shadow:0 0 0 2px rgba(0,201,167,.3),0 0 28px rgba(0,201,167,.15)}}
+/* First-time skeleton card */
+.card.first-fetch{border-color:rgba(245,158,11,.2)}
+
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px 12px}
+.card-tn{font-family:monospace;font-size:14px;font-weight:600;color:var(--teal);letter-spacing:.04em}
 .card-label-tag{font-size:11px;color:var(--muted);margin-top:3px}
-.card-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.card-header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .badge-gray{background:rgba(107,114,128,.2);color:var(--gray)}
 .badge-blue{background:rgba(59,130,246,.2);color:var(--blue)}
 .badge-amber{background:rgba(245,158,11,.2);color:var(--amber)}
 .badge-violet{background:rgba(139,92,246,.2);color:var(--violet)}
 .badge-green{background:rgba(16,185,129,.2);color:var(--green)}
+
+/* ── Action buttons ──────────────────────────────────────────────────────── */
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;
   padding:2px 4px;border-radius:4px;transition:color .2s}
 .del-btn:hover{color:var(--red)}
-.fetch-spinner{width:12px;height:12px;border:2px solid rgba(0,201,167,.3);
-  border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite}
+.refresh-btn{background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.2);
+  color:var(--teal);cursor:pointer;font-size:11px;font-weight:600;
+  padding:3px 8px;border-radius:6px;transition:all .2s;font-family:'Inter',sans-serif;
+  display:flex;align-items:center;gap:3px;white-space:nowrap}
+.refresh-btn:hover{background:rgba(0,201,167,.2);border-color:rgba(0,201,167,.4)}
+.refresh-btn:disabled{opacity:.4;cursor:not-allowed}
+.spin{display:inline-block;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* ── Delivery box ─────────────────────────────────────────────────────────── */
+.fetch-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);
+  animation:dot-pulse 1.2s ease-in-out infinite}
+@keyframes dot-pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+
+/* ── Delivery box ──────────────────────────────────────────────────────────── */
 .delivery-box{padding:12px 18px;background:rgba(0,201,167,.06);
   border-top:1px solid rgba(0,201,167,.1);border-bottom:1px solid rgba(0,201,167,.1)}
 .delivery-label-sm{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -88,38 +126,47 @@ header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15
 .delivery-box.pending{opacity:.5}
 .shipto{padding:8px 18px;font-size:12px;color:var(--muted)}
 .shipto span{color:var(--text);font-weight:500}
+
+/* ── Skeletons ──────────────────────────────────────────────────────────── */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,
+  rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;
+  border-radius:4px;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
 /* ── Timeline ────────────────────────────────────────────────────────────── */
 .timeline{display:flex;align-items:flex-start;padding:14px 18px;gap:0;overflow-x:auto}
-.tl-step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:60px;
-  position:relative}
+.tl-step{display:flex;flex-direction:column;align-items:center;flex:1;
+  min-width:60px;position:relative}
 .tl-step:not(:last-child)::after{content:'';position:absolute;top:10px;left:50%;
   width:100%;height:2px;background:var(--border);z-index:0}
 .tl-step.s-completed:not(:last-child)::after{background:var(--teal)}
+.tl-step.s-active:not(:last-child)::after{background:linear-gradient(90deg,var(--teal),var(--border))}
 .tl-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);
   background:var(--bg);display:flex;align-items:center;justify-content:center;
   font-size:9px;z-index:1;position:relative;transition:all .3s}
 .tl-step.s-completed .tl-dot{background:var(--teal);border-color:var(--teal);color:#000;font-weight:700}
 .tl-step.s-active .tl-dot{background:var(--bg);border-color:var(--teal);
   box-shadow:0 0 0 3px rgba(0,201,167,.25);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(0,201,167,.25)}50%{box-shadow:0 0 0 6px rgba(0,201,167,.1)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(0,201,167,.25)}
+  50%{box-shadow:0 0 0 6px rgba(0,201,167,.1)}}
 .tl-step.s-pending .tl-dot{border-color:rgba(255,255,255,.15)}
 .tl-name{font-size:9px;color:var(--muted);margin-top:5px;text-align:center;line-height:1.2}
 .tl-step.s-completed .tl-name,.tl-step.s-active .tl-name{color:var(--text)}
 .tl-loc{font-size:8px;color:var(--muted);text-align:center;margin-top:2px;line-height:1.2}
 .tl-date{font-size:8px;color:var(--muted);text-align:center;line-height:1.2}
+
 /* ── Card footer ──────────────────────────────────────────────────────────── */
 .card-footer{display:flex;justify-content:space-between;align-items:center;
   padding:10px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
-.error-msg{padding:8px 18px;font-size:11px;color:var(--red);
-  background:rgba(239,68,68,.07);border-top:1px solid rgba(239,68,68,.15)}
-/* ── Skeleton ─────────────────────────────────────────────────────────────── */
-.skeleton{height:20px;background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,
-  rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;
-  border-radius:4px;animation:shimmer 1.5s infinite}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.error-strip{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 18px;font-size:11px;color:var(--amber);
+  background:rgba(245,158,11,.07);border-top:1px solid rgba(245,158,11,.15)}
+.error-dismiss{background:none;border:none;color:inherit;opacity:.6;cursor:pointer;font-size:12px}
+.error-dismiss:hover{opacity:1}
+
 /* ── Modal ────────────────────────────────────────────────────────────────── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
-  backdrop-filter:blur(4px)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:200;backdrop-filter:blur(4px)}
 .overlay.open{display:flex;align-items:center;justify-content:center}
 .modal{background:#111827;border:1px solid var(--border);border-radius:20px;
   padding:30px;width:420px;max-width:90vw}
@@ -132,18 +179,17 @@ header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15
   font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border .2s}
 .form-group input:focus{border-color:var(--teal)}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
-.toast{position:fixed;bottom:24px;right:24px;background:#1F2937;
-  border-left:3px solid var(--teal);padding:12px 18px;border-radius:8px;
-  font-size:13px;z-index:300;opacity:0;transform:translateY(10px);
-  transition:all .3s;pointer-events:none}
+.toast{position:fixed;bottom:24px;right:24px;background:#1F2937;border-left:3px solid var(--teal);
+  padding:12px 18px;border-radius:8px;font-size:13px;z-index:300;opacity:0;
+  transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:340px}
 .toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
 
-<!-- ── Agent Offline Banner ────────────────────────────────────────────────── -->
+<!-- ── Agent Offline Banner ──────────────────────────────────────────────────── -->
 <div class="agent-banner" id="agentBanner">
-  ⚠ WARNING: Tracking Agent is currently Offline. It has stopped fetching new data. Please run upstracking_v2.exe
+  ⚠ WARNING: Tracking Agent is Offline. Run UPS_Tracker_Agent.exe to resume tracking.
 </div>
 
 <!-- ── Header ─────────────────────────────────────────────────────────────── -->
@@ -152,13 +198,13 @@ header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15
     <div class="logo-icon">📦</div>
     <div>
       <div class="logo-text">UPS Tracking Dashboard</div>
-      <div class="logo-sub">Jewellery Shipment Monitor</div>
+      <div class="logo-sub">Jewellery Shipment Monitor — v3.1</div>
     </div>
   </div>
   <div class="header-right">
     <div class="sync-info" id="syncInfo">
-        <div class="indicator" id="agentDot"></div>
-        <span id="agentText">Connecting…</span>
+      <div class="indicator" id="agentDot"></div>
+      <span id="agentText">Connecting…</span>
     </div>
     <button class="btn btn-ghost" onclick="openSettingsModal()">⚙ Settings</button>
     <button class="btn btn-primary" onclick="openModal()">+ Add Tracking</button>
@@ -167,36 +213,34 @@ header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15
 
 <!-- ── Stats ──────────────────────────────────────────────────────────────── -->
 <div class="stats-bar">
-  <div class="stat-card">
-    <div class="stat-label">Total Parcels</div>
-    <div class="stat-value total" id="sTotal">0</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Delivered</div>
-    <div class="stat-value delivered" id="sDelivered">0</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">In Transit</div>
-    <div class="stat-value transit" id="sTransit">0</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Out for Delivery</div>
-    <div class="stat-value out" id="sOut">0</div>
-  </div>
+  <div class="stat-card"><div class="stat-label">Total Parcels</div><div class="stat-value total" id="sTotal">0</div></div>
+  <div class="stat-card"><div class="stat-label">Delivered</div><div class="stat-value delivered" id="sDelivered">0</div></div>
+  <div class="stat-card"><div class="stat-label">In Transit</div><div class="stat-value transit" id="sTransit">0</div></div>
+  <div class="stat-card"><div class="stat-label">Out for Delivery</div><div class="stat-value out" id="sOut">0</div></div>
+</div>
+
+<!-- ── Recent Updates ─────────────────────────────────────────────────────── -->
+<div class="updates-bar" id="updatesBar">
+  <div class="updates-title">Recent Updates:</div>
+  <div style="font-size:11px;color:var(--muted)" id="noUpdatesText">No recent status changes…</div>
+  <div style="display:flex;gap:8px" id="updatesList"></div>
 </div>
 
 <!-- ── Filters ─────────────────────────────────────────────────────────────── -->
 <div class="filters">
-  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-  <button class="filter-btn" onclick="setFilter('Label Created',this)">Label Created</button>
-  <button class="filter-btn" onclick="setFilter('We Have Your Package',this)">Received</button>
-  <button class="filter-btn" onclick="setFilter('On the Way',this)">In Transit</button>
-  <button class="filter-btn" onclick="setFilter('Out for Delivery',this)">Out for Delivery</button>
-  <button class="filter-btn" onclick="setFilter('Delivered',this)">Delivered</button>
+  <div class="filter-label">Show:</div>
+  <button class="filter-btn active" data-status="Pending"              onclick="toggleFilter(this)">Pending</button>
+  <button class="filter-btn active" data-status="Label Created"        onclick="toggleFilter(this)">Label Created</button>
+  <button class="filter-btn active" data-status="We Have Your Package" onclick="toggleFilter(this)">Received</button>
+  <button class="filter-btn active" data-status="On the Way"           onclick="toggleFilter(this)">In Transit</button>
+  <button class="filter-btn active" data-status="Out for Delivery"     onclick="toggleFilter(this)">Out for Delivery</button>
+  <button class="filter-btn active" data-status="Delivered"            onclick="toggleFilter(this)">Delivered</button>
 </div>
 
 <!-- ── Cards ──────────────────────────────────────────────────────────────── -->
-<div id="cards"><div class="empty-state"><div class="e-icon">🔄</div><h3>Connecting to Firebase…</h3></div></div>
+<div id="cards">
+  <div class="empty-state"><div class="e-icon">🔄</div><h3>Connecting to Firebase…</h3></div>
+</div>
 
 <!-- ── Add Modal ──────────────────────────────────────────────────────────── -->
 <div class="overlay" id="overlay">
@@ -218,15 +262,16 @@ header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15
   </div>
 </div>
 
-<!-- ── Settings Modal ──────────────────────────────────────────────────────────── -->
+<!-- ── Settings Modal ────────────────────────────────────────────────────── -->
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
     <h2>⚙ System Settings</h2>
     <p>Configure how often the background agent checks for UPS updates.</p>
     <div class="form-group">
-      <label>Default Check Interval (Minutes)</label>
+      <label>Auto-check Interval (Minutes)</label>
       <input type="number" id="inp-interval" value="150" min="1">
-      <div style="font-size:11px;color:var(--amber);margin-top:6px" id="lbl-min-interval">Minimum allowed: 1 minute (1 min per parcel)</div>
+      <div style="font-size:11px;color:var(--amber);margin-top:6px" id="lbl-min-interval">Minimum allowed: 1 min</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">Delivered parcels are excluded from the count.</div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeSettingsModal()">Cancel</button>
@@ -242,9 +287,9 @@ header{background:rgba(0,201,167,.07);border-bottom:1px solid rgba(0,201,167,.15
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════════════
-// 🔧 EDIT THESE WITH YOUR FIREBASE PROJECT DETAILS (see setup guide)
-// ══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// 🔧 FIREBASE PROJECT CONFIG
+// ═══════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyB5fTxAVEUoy5WYWne0-MFfgwwqPTjbt8E",
   authDomain: "ups-tracker-1d9d9.firebaseapp.com",
@@ -254,115 +299,164 @@ const firebaseConfig = {
   messagingSenderId: "203576217064",
   appId: "1:203576217064:web:4ee2c0d42c07a4d4f6a85d"
 };
-// ══════════════════════════════════════════════════════════════════════════════
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let watchlist    = {};
-let trackingData = {};
-let systemSettings = { interval_minutes: 150 };
-let activeFilter = 'all';
-let agentLastPing = 0;
+let watchlist          = {};
+let trackingData       = {};
+let systemSettings     = { interval_minutes: 150 };
+let agentLastPing      = 0;
+let previousTData      = null;
+// Tracking IDs waiting for force refresh to complete (button stays spun)
+const refreshPending   = new Set();
 
 const STEP_KEYS   = ['label_created','we_have_your_package','on_the_way','out_for_delivery','delivered'];
 const STEP_LABELS = ['Label','Received','In Transit','Out for Del.','Delivered'];
 
-// ── Agent Heartbeat Monitor ───────────────────────────────────────────────────
-db.ref('system/last_ping').on('value', snap => {
-  agentLastPing = snap.val() || 0;
-  checkAgentStatus();
-});
+// Status → pipeline index (same as backend STATUS_TO_IDX)
+const STATUS_IDX = {
+  'Label Created':0, 'We Have Your Package':1, 'On the Way':2,
+  'Out for Delivery':3, 'Delivered':4
+};
+const STATUS_WEIGHTS = {
+  'Out for Delivery':5,'On the Way':4,'We Have Your Package':3,
+  'Label Created':2,'Pending':1,'Delivered':0
+};
 
-setInterval(checkAgentStatus, 3000);
-
-function checkAgentStatus() {
-  const diff = Date.now() - agentLastPing;
-  const isOnline = diff < 30000; // Agent pings every 10-15s, so 30s is safe
-  
-  const textEl = document.getElementById('agentText');
-  const dotEl  = document.getElementById('agentDot');
-  const banner = document.getElementById('agentBanner');
-  
-  if(isOnline) {
-    textEl.textContent = 'Agent Online';
-    dotEl.className = 'indicator online';
-    banner.classList.remove('show');
-  } else {
-    textEl.textContent = 'Agent Offline';
-    dotEl.className = 'indicator offline';
-    banner.classList.add('show');
-  }
+// ── Agent heartbeat ───────────────────────────────────────────────────────────
+db.ref('system/last_ping').on('value', s => { agentLastPing = s.val()||0; checkAgent(); });
+setInterval(checkAgent, 3000);
+function checkAgent() {
+  const online = (Date.now() - agentLastPing) < 30000;
+  document.getElementById('agentText').textContent = online ? 'Agent Online' : 'Agent Offline';
+  document.getElementById('agentDot').className    = `indicator ${online?'online':'offline'}`;
+  document.getElementById('agentBanner').classList.toggle('show', !online);
 }
 
 // ── Firebase listeners ────────────────────────────────────────────────────────
-db.ref('watchlist').on('value', snap => {
-  watchlist = snap.val() || {};
-  render();
-  updateStats();
-});
-
-db.ref('system/settings').on('value', snap => {
-  systemSettings = snap.val() || { interval_minutes: 150 };
+db.ref('watchlist').on('value', s => { watchlist = s.val()||{}; render(); updateStats(); });
+db.ref('system/settings').on('value', s => {
+  systemSettings = s.val()||{interval_minutes:150};
   document.getElementById('inp-interval').value = systemSettings.interval_minutes;
 });
 
-db.ref('tracking_data').on('value', snap => {
-  trackingData = snap.val() || {};
-  render();
-  updateStats();
+db.ref('tracking_data').on('value', s => {
+  const newData = s.val() || {};
+
+  if (previousTData) {
+    for (const tn in newData) {
+      const oldS = previousTData[tn]?.status;
+      const newS = newData[tn]?.status;
+      if (oldS && newS && oldS !== newS) {
+        addUpdateNotification(newData[tn].label||tn, oldS, newS);
+        toast(`🔔 ${newData[tn].label||tn}: ${oldS} → ${newS}`, '#3B82F6');
+      } else if (!oldS && newS) {
+        addUpdateNotification(newData[tn].label||tn, 'Pending', newS);
+      }
+      // Un-spin refresh button when force_refresh is cleared by backend
+      if (previousTData[tn]?.force_refresh && !newData[tn]?.force_refresh) {
+        refreshPending.delete(tn);
+      }
+    }
+  }
+
+  previousTData = JSON.parse(JSON.stringify(newData));
+  trackingData  = newData;
+  render(); updateStats();
 });
+
+// ── Manual force refresh ──────────────────────────────────────────────────────
+function forceRefresh(tn, label) {
+  if (refreshPending.has(tn)) return;
+  refreshPending.add(tn);
+
+  // ✅ FIX: Do NOT set last_updated:0 — that would blank the card.
+  //         Only set the flags the backend needs. Existing data stays intact.
+  db.ref(`tracking_data/${tn}`).update({
+    force_refresh: true,
+    fetching:      true
+    // last_updated is intentionally NOT touched here
+  }).then(() => {
+    toast(`⏳ Refresh queued for ${label||tn}`, '#00C9A7');
+    render(); // redraw to disable button immediately
+  }).catch(e => {
+    refreshPending.delete(tn);
+    toast('Error: '+e.message, '#EF4444');
+  });
+}
+
+// ── Updates bar ───────────────────────────────────────────────────────────────
+function addUpdateNotification(label, oldS, newS) {
+  document.getElementById('noUpdatesText').style.display = 'none';
+  const list = document.getElementById('updatesList');
+  const now  = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const cls  = newS==='Delivered'?'status-Delivered': newS==='Out for Delivery'?'status-Out':'';
+  const div  = document.createElement('div');
+  div.className = `update-tag ${cls}`;
+  div.innerHTML = `<strong>${label}</strong><span class="arr">➔</span><span>${newS}</span>`
+    +`<span class="time">${now}</span>`
+    +`<button class="cls-btn" onclick="this.parentElement.remove();`
+    +`if(!document.getElementById('updatesList').children.length)`
+    +`document.getElementById('noUpdatesText').style.display='block'">✕</button>`;
+  list.prepend(div);
+  if (list.children.length > 10) list.removeChild(list.lastChild);
+}
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function updateStats() {
-  const tns = Object.values(watchlist).map(i => i.tracking_number).filter(Boolean);
-  let delivered=0, transit=0, out=0;
-  tns.forEach(tn => {
-    const s = (trackingData[tn]||{}).status || '';
-    if (s==='Delivered') delivered++;
-    else if (s==='On the Way') transit++;
-    else if (s==='Out for Delivery') out++;
+  const tns = Object.values(watchlist).map(i=>i.tracking_number).filter(Boolean);
+  let d=0,t=0,o=0;
+  tns.forEach(tn=>{
+    const s=(trackingData[tn]||{}).status||'';
+    if(s==='Delivered') d++;
+    else if(s==='On the Way') t++;
+    else if(s==='Out for Delivery') o++;
   });
   document.getElementById('sTotal').textContent     = tns.length;
-  document.getElementById('sDelivered').textContent = delivered;
-  document.getElementById('sTransit').textContent   = transit;
-  document.getElementById('sOut').textContent       = out;
-  document.getElementById('lbl-min-interval').textContent = `Minimum enforced safety interval: ${Math.max(1, tns.length)} minutes`;
+  document.getElementById('sDelivered').textContent = d;
+  document.getElementById('sTransit').textContent   = t;
+  document.getElementById('sOut').textContent       = o;
+  document.getElementById('lbl-min-interval').textContent =
+    `Minimum enforced interval: ${Math.max(1, tns.length-d)} min`;
 }
 
-// ── Render cards ──────────────────────────────────────────────────────────────
-function render() {
-  const container  = document.getElementById('cards');
-  const entries    = Object.entries(watchlist);
+// ── Filters ───────────────────────────────────────────────────────────────────
+function toggleFilter(el) { el.classList.toggle('active'); render(); }
 
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const cont    = document.getElementById('cards');
+  const entries = Object.entries(watchlist);
   if (!entries.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="e-icon">📦</div>
-        <h3>No parcels in watchlist</h3>
-        <p style="color:var(--muted);margin-top:8px">Click "+ Add Tracking" to get started</p>
-      </div>`;
+    cont.innerHTML = `<div class="empty-state"><div class="e-icon">📦</div>
+      <h3>No parcels in watchlist</h3>
+      <p style="color:var(--muted);margin-top:8px">Click "+ Add Tracking" to get started</p></div>`;
     return;
   }
 
-  const filtered = activeFilter === 'all'
-    ? entries
-    : entries.filter(([,item]) => {
-        const s = (trackingData[item.tracking_number]||{}).status||'';
-        return s === activeFilter;
-      });
+  const activeStatuses = Array.from(document.querySelectorAll('.filter-btn.active')).map(b=>b.dataset.status);
+  let filtered = entries.filter(([,item])=>{
+    const s = (trackingData[item.tracking_number]||{}).status || '';
+    return activeStatuses.includes(s || 'Pending');
+  });
+
+  filtered.sort((a,b)=>{
+    const wA = STATUS_WEIGHTS[(trackingData[a[1].tracking_number]||{}).status||'Pending']??1;
+    const wB = STATUS_WEIGHTS[(trackingData[b[1].tracking_number]||{}).status||'Pending']??1;
+    if (wA!==wB) return wB-wA;
+    const tA = (trackingData[a[1].tracking_number]||{}).last_updated || a[1].added_at || 0;
+    const tB = (trackingData[b[1].tracking_number]||{}).last_updated || b[1].added_at || 0;
+    return tB-tA;
+  });
 
   if (!filtered.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="e-icon">🔍</div>
-        <h3>No parcels match this filter</h3>
-      </div>`;
+    cont.innerHTML = `<div class="empty-state"><div class="e-icon">🔍</div>
+      <h3>No parcels match these filters</h3>
+      <p style="color:var(--muted);margin-top:8px">Toggle the buttons above.</p></div>`;
     return;
   }
-
-  container.innerHTML = filtered.map(([key,item]) => buildCard(key, item)).join('');
+  cont.innerHTML = filtered.map(([k,i])=>buildCard(k,i)).join('');
 }
 
 function buildCard(key, item) {
@@ -370,73 +464,113 @@ function buildCard(key, item) {
   const lbl  = item.label || '';
   const data = trackingData[tn] || {};
 
-  const status   = data.status     || '';
-  const fetching = data.fetching   || false;
-  const estDel   = data.estimated_delivery || '';
-  const shipTo   = data.ship_to    || '';
-  const errMsg   = data.error      || '';
-  const lastUpd  = data.last_updated ? fmtAgo(data.last_updated) : 'Pending first fetch…';
+  const status      = data.status      || '';
+  const fetching    = !!data.fetching;
+  const forceFlag   = !!data.force_refresh;
+  const estDel      = data.estimated_delivery || '';
+  const shipTo      = data.ship_to     || '';
+  const errMsg      = data.error       || '';
+  const lastUpdMs   = data.last_updated || 0;
   const isDelivered = status.toLowerCase().includes('delivered');
+
+  // ── Key insight: "has data" means the backend has saved at least one successful
+  //    fetch. We determine this by whether steps has any non-pending entry OR
+  //    status is set OR estimated_delivery is set. NOT by last_updated, because
+  //    that could be 0 after a force_refresh.
+  const steps = data.steps || {};
+  const anyStepActive = Object.values(steps).some(
+    s => s && (s.state === 'completed' || s.state === 'active'));
+  const hasData = !!(status || estDel || anyStepActive);
+
+  // Card state classes
+  const isFirstFetch = fetching && !hasData;
+  const isRefreshing = fetching && hasData;
+  const isWaiting    = refreshPending.has(tn) || forceFlag;
+  const cardClass    = isRefreshing ? 'refreshing' : (isFirstFetch ? 'first-fetch' : '');
 
   const badgeMap = {
     'Label Created':'badge-gray','We Have Your Package':'badge-blue',
     'On the Way':'badge-amber','Out for Delivery':'badge-violet','Delivered':'badge-green'
   };
-  const badgeClass = badgeMap[status] || 'badge-gray';
 
-  // Timeline steps
-  const steps = data.steps || {};
-  const timelineHTML = STEP_KEYS.map((sk, i) => {
+  // ── Timeline ──────────────────────────────────────────────────────────────
+  const timelineHTML = STEP_KEYS.map((sk,i)=>{
     const step  = steps[sk] || {};
     const state = step.state || 'pending';
-    const cls   = `s-${state}`;
-    const loc   = step.city ? `${step.city}` : (step.country || '');
-    const country = step.country && step.city ? step.country : '';
-    const dt    = step.date ? step.date + (step.time ? ', '+step.time : '') : '';
-    const dot   = state==='completed' ? '✓' : (state==='active' ? '●' : '');
-    return `
-      <div class="tl-step ${cls}">
-        <div class="tl-dot">${dot}</div>
-        <div class="tl-name">${STEP_LABELS[i]}</div>
-        ${loc ? `<div class="tl-loc">${loc}</div>` : ''}
-        ${country ? `<div class="tl-loc">${country}</div>` : ''}
-        ${dt ? `<div class="tl-date">${dt}</div>` : ''}
-      </div>`;
+    const loc   = step.city  || '';
+    const ctry  = step.country || '';
+    const dt    = step.date ? step.date+(step.time?', '+step.time:'') : '';
+    const dot   = state==='completed'?'✓': state==='active'?'●':'';
+    return `<div class="tl-step s-${state}">
+      <div class="tl-dot">${dot}</div>
+      <div class="tl-name">${STEP_LABELS[i]}</div>
+      ${loc?`<div class="tl-loc">${loc}</div>`:''}
+      ${ctry&&ctry!==loc?`<div class="tl-loc">${ctry}</div>`:''}
+      ${dt?`<div class="tl-date">${dt}</div>`:''}
+    </div>`;
   }).join('');
 
-  const deliveryBox = fetching
-    ? `<div class="delivery-box"><div class="skeleton" style="width:80%;height:18px"></div></div>`
-    : estDel
-      ? `<div class="delivery-box">
-           <div class="delivery-label-sm">${isDelivered ? 'Delivered On' : 'Estimated Delivery'}</div>
-           <div class="delivery-time">${estDel}</div>
-         </div>`
-      : `<div class="delivery-box pending">
-           <div class="delivery-time" style="font-size:13px">Awaiting tracking data…</div>
-         </div>`;
+  // ── Delivery box ─────────────────────────────────────────────────────────
+  // Rule: skeleton ONLY when it's the very first fetch AND no estDel yet
+  let deliveryBox;
+  if (isFirstFetch && !estDel) {
+    deliveryBox = `<div class="delivery-box">
+      <div class="skeleton" style="width:55%;height:12px;margin-bottom:6px"></div>
+      <div class="skeleton" style="width:80%;height:18px"></div></div>`;
+  } else if (estDel) {
+    deliveryBox = `<div class="delivery-box">
+      <div class="delivery-label-sm">${isDelivered?'Delivered On':'Estimated Delivery'}</div>
+      <div class="delivery-time">${estDel}</div></div>`;
+  } else {
+    deliveryBox = `<div class="delivery-box pending">
+      <div class="delivery-time" style="font-size:13px">Awaiting tracking data…</div>
+    </div>`;
+  }
+
+  // ── Refresh button ────────────────────────────────────────────────────────
+  const btnDisabled = fetching || isWaiting;
+  const btnLabel    = btnDisabled
+    ? `<span class="spin">🔄</span> Refreshing`
+    : `🔄 Refresh Now`;
+  const refreshBtn  = `<button class="refresh-btn" id="rfbtn-${tn}"
+    onclick="forceRefresh('${tn}','${lbl.replace(/'/g,"\\'")}');return false;"
+    ${btnDisabled?'disabled':''} title="Force re-track now">${btnLabel}</button>`;
+
+  // ── Error strip (non-destructive, dismissable) ────────────────────────────
+  const errStrip = errMsg
+    ? `<div class="error-strip">
+        <span>⚠ ${errMsg}</span>
+        <button class="error-dismiss"
+          onclick="firebase.database().ref('tracking_data/${tn}/error').set('');return false;">✕</button>
+       </div>` : '';
+
+  // ── Last updated text ─────────────────────────────────────────────────────
+  const updText = lastUpdMs ? fmtAgo(lastUpdMs) : (isFirstFetch ? 'First fetch in progress…' : 'Pending first fetch…');
 
   return `
-    <div class="card ${fetching?'fetching':''}" id="card-${tn}">
-      <div class="card-header">
-        <div>
-          <div class="card-tn">${tn}</div>
-          ${lbl ? `<div class="card-label-tag">🏷 ${lbl}</div>` : ''}
-        </div>
-        <div class="card-header-right">
-          ${status ? `<span class="badge ${badgeClass}">${status}</span>` : ''}
-          ${fetching ? `<div class="fetch-spinner" title="Syncing…"></div>` : ''}
-          <button class="del-btn" onclick="removeTracking('${key}','${tn}')" title="Remove">✕</button>
-        </div>
+  <div class="card ${cardClass}" id="card-${tn}">
+    <div class="card-header">
+      <div>
+        <div class="card-tn">${tn}</div>
+        ${lbl?`<div class="card-label-tag">🏷 ${lbl}</div>`:''}
       </div>
-      ${deliveryBox}
-      ${shipTo ? `<div class="shipto"><span>${isDelivered?'Delivered To':'Ship To'}: </span>${shipTo.toUpperCase()}</div>` : ''}
-      <div class="timeline">${timelineHTML}</div>
-      ${errMsg ? `<div class="error-msg">⚠ ${errMsg}</div>` : ''}
-      <div class="card-footer">
-        <span>🕐 ${lastUpd}</span>
-        ${fetching ? `<span style="color:var(--teal);font-size:10px">🔄 Syncing…</span>` : ''}
+      <div class="card-header-right">
+        ${status?`<span class="badge ${badgeMap[status]||'badge-gray'}">${status}</span>`:''}
+        ${isRefreshing?`<div class="fetch-dot" title="Refreshing…"></div>`:''}
+        ${refreshBtn}
+        <button class="del-btn" onclick="removeTracking('${key}','${tn}')" title="Remove">✕</button>
       </div>
-    </div>`;
+    </div>
+    ${deliveryBox}
+    ${shipTo?`<div class="shipto"><span>${isDelivered?'Delivered To':'Ship To'}: </span>${shipTo.toUpperCase()}</div>`:''}
+    <div class="timeline">${timelineHTML}</div>
+    ${errStrip}
+    <div class="card-footer">
+      <span>🕐 ${updText}</span>
+      ${isRefreshing?`<span style="color:var(--teal);font-size:10px">🔄 Refreshing…</span>`:''}
+      ${isFirstFetch?`<span style="color:var(--amber);font-size:10px">⏳ First fetch…</span>`:''}
+    </div>
+  </div>`;
 }
 
 // ── Add / Remove ──────────────────────────────────────────────────────────────
@@ -444,89 +578,59 @@ function addTracking() {
   const tn  = document.getElementById('inp-tn').value.trim().toUpperCase();
   const lbl = document.getElementById('inp-label').value.trim();
   if (!tn) { toast('Please enter a tracking number.','#EF4444'); return; }
-
-  // Check duplicate
-  const existing = Object.values(watchlist).find(i => i.tracking_number === tn);
-  if (existing) { toast('Already in watchlist.','#F59E0B'); return; }
-
-  db.ref('watchlist').push({
-    tracking_number: tn,
-    label:           lbl,
-    added_at:        Date.now()
-  }).then(() => {
-    closeModal();
-    toast('✅ Added! Service will track it shortly.');
-  }).catch(e => toast('Error: '+e.message,'#EF4444'));
+  if (Object.values(watchlist).find(i=>i.tracking_number===tn)) {
+    toast('Already in watchlist.','#F59E0B'); return;
+  }
+  db.ref('watchlist').push({tracking_number:tn,label:lbl,added_at:Date.now()})
+    .then(()=>{ closeModal(); toast('✅ Added! Agent will track it shortly.'); })
+    .catch(e=>toast('Error: '+e.message,'#EF4444'));
 }
 
 function removeTracking(key, tn) {
   if (!confirm(`Remove tracking for ${tn}?`)) return;
   db.ref(`watchlist/${key}`).remove();
   db.ref(`tracking_data/${tn}`).remove();
+  refreshPending.delete(tn);
   toast('Removed from watchlist.');
 }
 
-// ── Filter ───────────────────────────────────────────────────────────────────
-function setFilter(f, el) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
-function openModal()  {
+// ── Modals ────────────────────────────────────────────────────────────────────
+function openModal() {
   document.getElementById('inp-tn').value='';
   document.getElementById('inp-label').value='';
   document.getElementById('overlay').classList.add('open');
   setTimeout(()=>document.getElementById('inp-tn').focus(),100);
 }
 function closeModal() { document.getElementById('overlay').classList.remove('open'); }
-document.getElementById('overlay').addEventListener('click', e => {
-  if (e.target===e.currentTarget) closeModal();
-});
-
-function openSettingsModal()  {
-  document.getElementById('inp-interval').value = systemSettings.interval_minutes || 150;
+document.getElementById('overlay').addEventListener('click', e=>{if(e.target===e.currentTarget)closeModal();});
+function openSettingsModal() {
+  document.getElementById('inp-interval').value=systemSettings.interval_minutes||150;
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettingsModal() { document.getElementById('settingsOverlay').classList.remove('open'); }
-document.getElementById('settingsOverlay').addEventListener('click', e => {
-  if (e.target===e.currentTarget) closeSettingsModal();
-});
+document.getElementById('settingsOverlay').addEventListener('click', e=>{if(e.target===e.currentTarget)closeSettingsModal();});
 function saveSettings() {
-  const val = parseInt(document.getElementById('inp-interval').value);
-  if (!val || val < 1) return toast('Please enter a valid number','red');
-  db.ref('system/settings/interval_minutes').set(val).then(() => {
-    closeSettingsModal();
-    toast('⚙ Settings updated!');
-  }).catch(e => toast('Error: '+e.message,'#EF4444'));
+  const val=parseInt(document.getElementById('inp-interval').value);
+  if(!val||val<1) return toast('Enter a valid number','#EF4444');
+  db.ref('system/settings/interval_minutes').set(val)
+    .then(()=>{closeSettingsModal();toast('⚙ Settings saved!');})
+    .catch(e=>toast('Error: '+e.message,'#EF4444'));
 }
-
-document.addEventListener('keydown', e => { 
-  if(e.key==='Escape') { closeModal(); closeSettingsModal(); }
-});
-document.getElementById('inp-tn').addEventListener('keydown', e => {
-  if(e.key==='Enter') addTracking();
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeSettingsModal();}});
+document.getElementById('inp-tn').addEventListener('keydown',e=>{if(e.key==='Enter')addTracking();});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmtAgo(ms) {
-  const diff = Math.floor((Date.now()-ms)/1000);
-  if (diff<60)   return 'Just now';
-  if (diff<3600) return `${Math.floor(diff/60)} min ago`;
-  if (diff<86400)return `${Math.floor(diff/3600)} hr ago`;
+  const d=Math.floor((Date.now()-ms)/1000);
+  if(d<60)    return 'Just now';
+  if(d<3600)  return `${Math.floor(d/60)} min ago`;
+  if(d<86400) return `${Math.floor(d/3600)} hr ago`;
   return new Date(ms).toLocaleString();
 }
-function fmtTime(ms) {
-  return new Date(ms).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-}
 function toast(msg, color='#00C9A7') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.borderColor = color;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3200);
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.borderColor=color;
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3500);
 }
 </script>
 </body>
